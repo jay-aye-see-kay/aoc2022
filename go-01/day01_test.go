@@ -19,3 +19,17 @@ func TestDay1(t *testing.T) {
 		}
 	})
 }
+
+func BenchmarkDay1(b *testing.B) {
+	b.Run("part 1", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			part1()
+		}
+	})
+
+	b.Run("part 2", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			part2()
+		}
+	})
+}
