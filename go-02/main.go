@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	fmt.Printf("day 1 part 1: %+v\n", part1())
-	fmt.Printf("day 1 part 2: %+v\n", part2())
+	fmt.Printf("part 1: %+v\n", part1())
+	fmt.Printf("part 2: %+v\n", part2())
 }
 
 func readInput() string {
