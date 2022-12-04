@@ -3,7 +3,6 @@ use std::fs::read_to_string;
 
 fn get_cal_totals() -> Vec<i32> {
     let mut cal_totals: Vec<_> = read_input(1)
-        .trim()
         .split("\n\n")
         .map(|group| {
             group
