@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fmt.Printf("part 1: %+v\n", part1())
-	// fmt.Printf("part 2: %+v\n", part2())
+	fmt.Printf("part 2: %+v\n", part2())
 }
 
 func readInput() string {
@@ -21,10 +21,9 @@ func readInput() string {
 }
 
 func part1() int {
-	assignments := parseInput(readInput())
 	count := 0
-	for _, ass := range assignments {
-		if completelyOverlaps(ass) {
+	for _, assignment := range parseInput(readInput()) {
+		if assignment.completelyOverlap() {
 			count++
 		}
 	}
@@ -32,59 +31,44 @@ func part1() int {
 }
 
 func part2() int {
-	assignments := parseInput(readInput())
 	count := 0
-	for _, ass := range assignments {
-		if partiallyOverlaps(ass) {
+	for _, assignment := range parseInput(readInput()) {
+		if assignment.partiallyOverlap() {
 			count++
 		}
 	}
 	return count
 }
 
-func completelyOverlaps(ass []int) bool {
-	xStart := ass[0]
-	xEnd := ass[1]
-	yStart := ass[2]
-	yEnd := ass[3]
-
-	if xStart >= yStart && xEnd <= yEnd {
-		return true
-	} else if yStart >= xStart && yEnd <= xEnd {
-		return true
-	}
-	return false
+type TimeRange struct {
+	start int
+	end   int
 }
 
-func partiallyOverlaps(ass []int) bool {
-	xStart := ass[0]
-	xEnd := ass[1]
-	yStart := ass[2]
-	yEnd := ass[3]
-
-	if xEnd < yStart || xStart > yEnd {
-		return false
-	}
-	return true
+type Assignment struct {
+	x TimeRange
+	y TimeRange
 }
 
-func parseInput(s string) [][]int {
+func (a *Assignment) completelyOverlap() bool {
+	return (a.x.start >= a.y.start && a.x.end <= a.y.end) ||
+		(a.y.start >= a.x.start && a.y.end <= a.x.end)
+}
+
+func (a *Assignment) partiallyOverlap() bool {
+	return !(a.x.end < a.y.start || a.x.start > a.y.end)
+}
+
+func parseInput(s string) []Assignment {
 	lines := strings.Split(s, "\n")
-	out := make([][]int, len(lines))
+	out := make([]Assignment, len(lines))
 
 	for i, line := range lines {
-		halves := strings.Split(line, ",")
-		left := halves[0]
-		leftQuarter := strings.Split(left, "-")
-		leftStart, _ := strconv.Atoi(leftQuarter[0])
-		leftEnd, _ := strconv.Atoi(leftQuarter[1])
-
-		right := halves[1]
-		rightQuarter := strings.Split(right, "-")
-		rightStart, _ := strconv.Atoi(rightQuarter[0])
-		rightEnd, _ := strconv.Atoi(rightQuarter[1])
-
-		out[i] = []int{leftStart, leftEnd, rightStart, rightEnd}
+		nums := make([]int, 4)
+		for i, numStr := range strings.Split(strings.ReplaceAll(line, ",", "-"), "-") {
+			nums[i], _ = strconv.Atoi(numStr)
+		}
+		out[i] = Assignment{TimeRange{nums[0], nums[1]}, TimeRange{nums[2], nums[3]}}
 	}
 
 	return out
