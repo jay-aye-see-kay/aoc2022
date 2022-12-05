@@ -34,17 +34,9 @@ func (s *StrList) push(el string) {
 func (s *StrList) len() int {
 	return len(*s)
 }
-func makeStrList(s string) StrList {
-	list := strings.Split(s, "")
-	// reverse it (hack, remove when writing proper parser)
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		list[i], list[j] = list[j], list[i]
-	}
-	return list
-}
 
 func part1() string {
-	stacks, moves := parse()
+	stacks, moves := parseInput(readInput())
 	for _, move := range moves {
 		for i := 0; i < move.count; i++ {
 			stacks[move.to].push(stacks[move.from].pop())
@@ -58,7 +50,7 @@ func part1() string {
 }
 
 func part2() string {
-	stacks, moves := parse()
+	stacks, moves := parseInput(readInput())
 	for _, move := range moves {
 		toPush := StrList{}
 		for i := 0; i < move.count; i++ {
@@ -81,21 +73,28 @@ type Move struct {
 	to    int
 }
 
-func parse() ([]StrList, []Move) {
-	stacks := []StrList{
-		makeStrList("SPHVFG"),
-		makeStrList("MZDVBFJG"),
-		makeStrList("NJLMG"),
-		makeStrList("PWDVZGN"),
-		makeStrList("BCRV"),
-		makeStrList("ZLWPMSRV"),
-		makeStrList("PHT"),
-		makeStrList("VZHCNSRQ"),
-		makeStrList("JQVPGLF"),
-	}
-	input := readInput()
+func parseInput(input string) ([]StrList, []Move) {
 	halves := strings.Split(input, "\n\n")
+	stacksStr := halves[0]
 	movesStr := strings.TrimSpace(halves[1])
+
+	stacksGrid := [][]string{}
+	for _, line := range strings.Split(stacksStr, "\n") {
+		stacksGrid = append(stacksGrid, strings.Split(line, ""))
+	}
+
+	stacks := []StrList{}
+	for charIdx := 1; charIdx < len(stacksGrid[0]); charIdx += 4 {
+		stack := StrList{}
+		for lineIdx := len(stacksGrid) - 2; lineIdx >= 0; lineIdx-- {
+			char := stacksGrid[lineIdx][charIdx]
+			if char != " " {
+				stack.push(char)
+			}
+		}
+		stacks = append(stacks, stack)
+	}
+
 	moves := []Move{}
 	for _, line := range strings.Split(movesStr, "\n") {
 		bits := strings.Split(line, " ")
@@ -104,5 +103,6 @@ func parse() ([]StrList, []Move) {
 		to, _ := strconv.Atoi(bits[5])
 		moves = append(moves, Move{count, from - 1, to - 1})
 	}
+
 	return stacks, moves
 }
