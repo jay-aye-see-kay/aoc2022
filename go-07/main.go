@@ -20,55 +20,21 @@ func readInput() string {
 	return strings.TrimSpace(string(content))
 }
 
-// need to parse input into a list of commands
-// then parse those into a tree
-// then walk the tree summing file sizes
-// - what kind of DS is easiest to walk and sum?
-// - a recursive walk + sum is probably best
+type StrSet map[string]bool
 
-type FileNode struct {
-	name string
-	kind string // "dir" | "file"
-
-	// dir only
-	nodes []FileNode
-
-	// file only
-	size int
+func (s *StrSet) push(str string) {
+	(*s)[str] = true
 }
 
-// dir name -> size
-type DirSizes map[string]int
-
-type FileDetails struct {
-	name string
-	size int
-}
-
-type DirList map[string][]FileDetails
-
-func parseCommands(input string) DirList {
-
-	currentDirShort := "/"
+func parseCommands(input string) (StrSet, map[string]int) {
 	currentDirFull := "/"
-
-	// hold list of current file detail until we change
-	tmpFileDetails := []FileDetails{}
-
-	// list of dirs, and what's in them
-	dirs := make(DirList)
+	dirSet := StrSet{}           // list of dirs
+  dirSet.push("/")
+	fileDict := map[string]int{} // name -> size
 
 	for _, line := range strings.Split(input, "\n") {
 		if line[:4] == "$ cd" {
-			// record previous dir info
-			if len(tmpFileDetails) > 0 {
-				dirs[currentDirFull] = tmpFileDetails
-			}
-
-			// reset previous dir info
-			currentDirShort = line[5:]
-			tmpFileDetails = []FileDetails{}
-
+			currentDirShort := line[5:]
 			if currentDirShort == ".." {
 				currentDirFull = pathUp(currentDirFull)
 			} else if currentDirShort == "/" {
@@ -80,46 +46,17 @@ func parseCommands(input string) DirList {
 		} else if line[:4] == "$ ls" {
 			// ignore these lines, we can infer when it was run when we start getting results
 		} else if line[:3] == "dir" {
-			// ignore dirs we don't go into?
+			dirName := strings.Split(line, " ")[1]
+			dirSet.push(currentDirFull + dirName + "/")
 		} else {
 			// we've found a file
 			s := strings.Split(line, " ")
 			name := s[1]
-			size, err := strconv.Atoi(s[0])
-			if err != nil {
-				panic("couldn't parse file size")
-			}
-			tmpFileDetails = append(tmpFileDetails, FileDetails{name, size})
+			size, _ := strconv.Atoi(s[0])
+			fileDict[currentDirFull+name] = size
 		}
 	}
-
-	// add any remaining tmp data into dirs
-	if len(tmpFileDetails) > 0 {
-		dirs[currentDirFull] = tmpFileDetails
-	}
-
-	fmt.Println("")
-	return dirs
-}
-
-func findChildDirs(parentDir string, dirList DirList) DirList {
-	filteredList := make(DirList)
-	for path, data := range dirList {
-		if len(parentDir) < len(path) && path[:len(parentDir)] == parentDir {
-			filteredList[path] = data
-		}
-	}
-	return filteredList
-}
-
-func sumDirList(dirList DirList) int {
-	total := 0
-	for _, dirData := range dirList {
-		for _, fileData := range dirData {
-			total += fileData.size
-		}
-	}
-	return total
+	return dirSet, fileDict
 }
 
 func pathUp(path string) string {
@@ -130,44 +67,52 @@ func pathUp(path string) string {
 	return path[:idx+1]
 }
 
-// too high: 112680374
-// too low:    1027500
 func part1(input string) int {
-	dirs := parseCommands(input)
+	dirSet, fileDict := parseCommands(input)
 
 	sizes := make(map[string]int)
-	for path, data := range dirs {
-		dirPlusChildren := findChildDirs(path, dirs)
-		dirPlusChildren[path] = data
-		sizes[path] = sumDirList(dirPlusChildren)
+	for dirPath := range dirSet {
+		for filePath, size := range fileDict {
+			if len(dirPath) < len(filePath) && filePath[:len(dirPath)] == dirPath {
+				sizes[dirPath] += size
+			}
+		}
 	}
+
 	total := 0
 	for _, size := range sizes {
 		if size <= 100000 {
 			total += size
 		}
 	}
+
 	return total
 }
 
 func part2(input string) int {
-	return 0
-}
+	dirSet, fileDict := parseCommands(input)
 
-func walkTree(tree *FileNode, dirSizes *DirSizes) *DirSizes {
-	totalSize := 0
-
-	for _, node := range tree.nodes {
-		if tree.kind == "file" {
-			totalSize += node.size
-		} else if tree.kind == "dir" {
-			newTree := walkTree(tree, dirSizes)
-			totalSize += (*newTree)[node.name]
-		} else {
-			panic("ahh")
+	sizes := make(map[string]int)
+	for dirPath := range dirSet {
+		for filePath, size := range fileDict {
+			if len(dirPath) < len(filePath) && filePath[:len(dirPath)] == dirPath {
+				sizes[dirPath] += size
+			}
 		}
 	}
 
-	(*dirSizes)[tree.name] = totalSize
-	return dirSizes
+  totalUsage := sizes["/"]
+  totalAvailable := 70000000
+  requiredSpace := 30000000
+  availableSpace := totalAvailable - totalUsage
+  requiredToFree := requiredSpace - availableSpace
+
+  toFree := totalUsage
+  for _, dirSize := range sizes {
+    if dirSize > requiredToFree && dirSize < toFree {
+      toFree = dirSize
+    }
+  }
+
+	return toFree
 }

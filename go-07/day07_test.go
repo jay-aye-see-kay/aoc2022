@@ -3,13 +3,13 @@ package main
 import "testing"
 
 func TestDay1(t *testing.T) {
-	// t.Run("pathUp", func(t *testing.T) {
-	// 	actual := pathUp("/foo/bar/")
-	// 	expected := "/foo/"
-	// 	if actual != expected {
-	// 		t.Errorf("Expected \"%+v\" but received \"%+v\"", expected, actual)
-	// 	}
-	// })
+	t.Run("pathUp", func(t *testing.T) {
+		actual := pathUp("/foo/bar/")
+		expected := "/foo/"
+		if actual != expected {
+			t.Errorf("Expected \"%+v\" but received \"%+v\"", expected, actual)
+		}
+	})
 
 	t.Run("part 1 sample", func(t *testing.T) {
 		actual := part1(sample)
@@ -21,19 +21,19 @@ func TestDay1(t *testing.T) {
 
 	t.Run("part 1", func(t *testing.T) {
 		actual := part1(readInput())
-		expected := 0
+		expected := 1077191
 		if actual != expected {
 			t.Errorf("Expected \"%+v\" but received \"%+v\"", expected, actual)
 		}
 	})
 
-	// t.Run("part 2", func(t *testing.T) {
-	// 	actual := part2(readInput())
-	// 	expected := 0
-	// 	if actual != expected {
-	// 		t.Errorf("Expected \"%+v\" but received \"%+v\"", expected, actual)
-	// 	}
-	// })
+	t.Run("part 2", func(t *testing.T) {
+		actual := part2(readInput())
+		expected := 5649896
+		if actual != expected {
+			t.Errorf("Expected \"%+v\" but received \"%+v\"", expected, actual)
+		}
+	})
 }
 
 var sample = `$ cd /
