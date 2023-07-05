@@ -9,17 +9,33 @@ export function part1(input: string) {
       line.slice(line.length / 2),
     ]);
 
-  const values = rucksacks
-    .map(([c1, c2]) => R.intersection(c1.split(""), c2.split(""))[0])
-    .map(getValue);
+  const values = rucksacks.map(findCommonChar).map(getCharValue);
   return R.sum(values);
 }
 
 export function part2(input: string) {
-  return 0;
+  // group lines into 3s to form rucksacks
+  const rucksacks: string[][] = [];
+  for (const [i, line] of input.trim().split("\n").entries()) {
+    if (i % 3 == 0) rucksacks.push([]);
+    rucksacks.at(-1)?.push(line);
+  }
+
+  const values = rucksacks.map(findCommonChar).map(getCharValue);
+  return R.sum(values);
 }
 
-function getValue(item: string) {
+/** Finds the common character in a list of strings */
+function findCommonChar(strings: string[]) {
+  let charGroups = strings.map((s) => s.split(""));
+  while (charGroups.length >= 2) {
+    const [s1, s2, ...rest] = charGroups;
+    charGroups = [R.intersection(s1, s2), ...rest];
+  }
+  return charGroups[0][0];
+}
+
+function getCharValue(item: string) {
   const charCode = item.charCodeAt(0);
   if (charCode >= 65 && charCode <= 90) {
     return charCode - 38;
