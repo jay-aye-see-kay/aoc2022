@@ -13,7 +13,7 @@ func main() {
 }
 
 func readInput() string {
-	content, err := ioutil.ReadFile("../inputs/day08.txt")
+	content, err := ioutil.ReadFile("./inputs/day08.txt")
 	if err != nil {
 		fmt.Println("Error reading file")
 	}
