@@ -5,7 +5,7 @@ export function part1(input: string) {
 }
 
 export function part2(input: string) {
-  return 0;
+  return parseInput(input).filter(doShiftsOverlapABit).length;
 }
 
 type Shift = {
@@ -29,4 +29,8 @@ function doShiftsOverlapEntirely([s1, s2]: Shift[]): boolean {
   const firstOverlapsSecond = s1.start >= s2.start && s1.end <= s2.end;
   const secondOverlapsFirst = s2.start >= s1.start && s2.end <= s1.end;
   return firstOverlapsSecond || secondOverlapsFirst;
+}
+
+function doShiftsOverlapABit([s1, s2]: Shift[]): boolean {
+  return !(s1.end < s2.start || s1.start > s2.end);
 }

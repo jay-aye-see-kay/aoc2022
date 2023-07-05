@@ -12,12 +12,12 @@ describe("day 4", async () => {
     expect(part1(realInput)).toBe(433);
   });
 
-  test.skip("part 2 test input", () => {
-    expect(part2(testInput)).toBe(0);
+  test("part 2 test input", () => {
+    expect(part2(testInput)).toBe(4);
   });
 
-  test.skip("part 2 real input", () => {
-    expect(part2(realInput)).toBe(0);
+  test("part 2 real input", () => {
+    expect(part2(realInput)).toBe(852);
   });
 });
 
